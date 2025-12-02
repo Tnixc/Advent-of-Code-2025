@@ -2,10 +2,6 @@ let input = String.trim {|
 #include "inputs/2"
 |} in
 
-let t =
-  {|11-22,95-115,998-1012,1188511880-1188511890,222220-222224,1698522-1698528,446443-446449,38593856-38593862,565653-565659,824824821-824824827,2121212118-2121212124|}
-in
-
 let rec check2 str len span span_len =
   if len = 0 then true
   else if len < span_len || len mod span_len <> 0 then false
@@ -45,4 +41,4 @@ let p1, p2 =
   |> List.fold_left (fun (l1, l2) (r1, r2) -> (l1 + r1, l2 + r2)) (0, 0)
 in
 
-Printf.printf "S: %d, %d\n" p1 p2
+Printf.printf "%d, %d\n" p1 p2
