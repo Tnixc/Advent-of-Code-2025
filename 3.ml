@@ -25,9 +25,8 @@ in
 let solve str depth =
   String.split_on_char '\n' str
   |> List.map (fun l -> solve_general l depth [])
-  |> List.map List.rev
   |> List.map (fun l ->
-      List.fold_left (fun acc c -> acc ^ String.make 1 c) "" l)
+      List.fold_right (fun c acc -> acc ^ String.make 1 c) l "")
   |> List.map int_of_string |> List.fold_left ( + ) 0
 in
 
