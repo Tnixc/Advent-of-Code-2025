@@ -25,35 +25,55 @@ let solve str =
     |> List.length
   in
 
-  let grid_a = grid_init in
-  let grid_b = Array.map Array.copy grid_init in
+  let grid = grid_init in
 
-  let step src dst =
+  let step1 () =
+    let grid_temp = Array.map Array.copy grid in
     let count = ref 0 in
 
     for y = 0 to height - 1 do
       for x = 0 to width - 1 do
-        let cell = src.(y).(x) in
-        if cell = '@' then
-          if count_neighbors src y x < 4 then (
-            dst.(y).(x) <- '.';
+        if grid.(y).(x) = '@' then
+          if count_neighbors grid y x < 4 then (
+            grid_temp.(y).(x) <- '.';
             incr count)
-          else dst.(y).(x) <- '@'
-        else dst.(y).(x) <- cell
+          else grid_temp.(y).(x) <- '@'
+        else grid_temp.(y).(x) <- grid.(y).(x)
+      done
+    done;
+
+    for y = 0 to height - 1 do
+      for x = 0 to width - 1 do
+        grid.(y).(x) <- grid_temp.(y).(x)
       done
     done;
 
     !count
   in
 
-  let rec loop src dst total_count depth =
-    if depth = 1 then p1 := total_count;
-    let count = step src dst in
-    if count = 0 then total_count
-    else loop dst src (total_count + count) (depth + 1)
+  let step () =
+    let count = ref 0 in
+
+    for y = 0 to height - 1 do
+      for x = 0 to width - 1 do
+        if grid.(y).(x) = '@' then
+          if count_neighbors grid y x < 4 then (
+            grid.(y).(x) <- '.';
+            incr count)
+      done
+    done;
+
+    !count
   in
 
-  let count = loop grid_a grid_b 0 0 in
+  let rec loop total_count depth =
+    let count = if depth = 0 then step1 () else step () in
+    if depth = 0 then p1 := count;
+    if count = 0 then total_count
+    else loop (total_count + count) (depth + 1)
+  in
+
+  let count = loop 0 0 in
   (!p1, count)
 in
 
