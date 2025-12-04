@@ -22,39 +22,31 @@ let solve str =
   in
 
   let step grid =
-    let new_grid =
+    let count = ref 0 in
+
+    let grid_new =
       grid
       |> Array.mapi (fun y ->
           Array.mapi (fun x cell ->
               if cell = '@' then
-                if count_neighbors grid y x < 4 then 'X' else '@'
+                if count_neighbors grid y x < 4 then (
+                  incr count;
+                  '.')
+                else '@'
               else cell))
     in
 
-    let changed = ref false in
-    let count = ref 0 in
-
-    new_grid
-    |> Array.iteri (fun y ->
-        Array.iteri (fun x cell ->
-            if cell = 'X' && grid.(y).(x) = '@' then (
-              changed := true;
-              incr count)));
-
-    ( new_grid
-      |> Array.map (Array.map (fun cell -> if cell = 'X' then '.' else cell)),
-      !changed,
-      !count )
+    (grid_new, !count)
   in
 
   let rec loop grid total_count depth =
     if depth = 1 then p1 := total_count;
-    let new_grid, changed, count = step grid in
-    if changed then loop new_grid (total_count + count) (depth + 1)
-    else (new_grid, total_count)
+    let new_grid, count = step grid in
+    if count = 0 then total_count
+    else loop new_grid (total_count + count) (depth + 1)
   in
 
-  let final_grid, count = loop grid_init 0 0 in
+  let count = loop grid_init 0 0 in
   (!p1, count)
 in
 
