@@ -2,80 +2,64 @@ let input = String.trim {|
 #include "inputs/4"
 |} in
 
-let t =
-  {|..@@.@@@@.
-@@@.@.@.@@
-@@@@@.@.@@
-@.@@@@..@.
-@@.@@@@.@@
-.@@@@@@@.@
-.@.@.@.@@@
-@.@@@.@@@@
-.@@@@@@@@.
-@.@.@@@.@.|}
-in
-
-let parse_input str =
-  let rows =
-    String.split_on_char '\n' str
-    |> List.map (fun l ->
-        Array.of_list (List.of_seq (String.to_seq ("#" ^ l ^ "#"))))
+let solve str =
+  let pad_line l = "#" ^ l ^ "#" in
+  let lines = String.split_on_char '\n' str |> List.map pad_line in
+  let w = String.length (List.hd lines) in
+  let border = String.make w '#' in
+  let grid_init =
+    (border :: lines) @ [ border ]
+    |> List.map (fun s -> Array.init (String.length s) (fun i -> s.[i]))
+    |> Array.of_list
   in
-  let width = Array.length (List.hd rows) in
-  let border = Array.init width (fun _ -> '#') in
-  Array.of_list ((border :: rows) @ [ border ])
+  let p1 = ref 0 in
+  let count_neighbors grid y x =
+    let neighbors =
+      [ (-1, -1); (0, -1); (1, -1); (-1, 0); (1, 0); (-1, 1); (0, 1); (1, 1) ]
+    in
+    List.filter
+      (fun (dx, dy) ->
+        grid.(y + dy).(x + dx) = '@' || grid.(y + dy).(x + dx) = 'X')
+      neighbors
+    |> List.length
+  in
+
+  let step grid =
+    let new_grid =
+      grid
+      |> Array.mapi (fun y ->
+          Array.mapi (fun x cell ->
+              if cell = '@' then
+                if count_neighbors grid y x < 4 then 'X' else '@'
+              else cell))
+    in
+
+    let changed = ref false in
+    let count = ref 0 in
+
+    new_grid
+    |> Array.iteri (fun y ->
+        Array.iteri (fun x cell ->
+            if cell = 'X' && grid.(y).(x) = '@' then (
+              changed := true;
+              incr count)));
+
+    ( new_grid
+      |> Array.map (Array.map (fun cell -> if cell = 'X' then '.' else cell)),
+      !changed,
+      !count )
+  in
+
+  let rec loop grid total_count depth =
+    if depth = 1 then p1 := total_count;
+    let new_grid, changed, count = step grid in
+    if changed then loop new_grid (total_count + count) (depth + 1)
+    else (new_grid, total_count)
+  in
+
+  let final_grid, count = loop grid_init 0 0 in
+  (!p1, count)
 in
 
-let grid = ref (parse_input input) in
-let changed = ref true in
-let w = Array.length !grid - 2 in
-let h = Array.length !grid.(0) - 2 in
-
-let count = ref 0 in
-while !changed do
-  changed := false;
-
-  for y = 1 to h do
-    for x = 1 to w do
-      if !grid.(y).(x) = '@' then
-        let neighbors =
-          [
-            (x - 1, y - 1);
-            (x, y - 1);
-            (x + 1, y - 1);
-            (x - 1, y);
-            (x + 1, y);
-            (x - 1, y + 1);
-            (x, y + 1);
-            (x + 1, y + 1);
-          ]
-        in
-        if
-          List.length
-            (List.filter
-               (fun l -> l)
-               (List.map
-                  (fun (i, j) -> !grid.(j).(i) = '@' || !grid.(j).(i) = 'X')
-                  neighbors))
-          < 4
-        then (
-          count := !count + 1;
-          changed := true;
-          !grid.(y).(x) <- 'X')
-    done
-  done;
-
-  grid :=
-    Array.map
-      (fun row -> Array.map (fun cell -> if cell = 'X' then '.' else cell) row)
-      !grid
-done;
-
-Printf.printf "%d\n" !count;
-
-for x = 1 to w do
-  for y = 1 to h do
-    Printf.printf "%c" !grid.(y).(x)
-  done;
-  Printf.printf "\n"
-done
+let p1, p2 = solve input in
+Printf.printf "%d, %d\n" p1 p2
