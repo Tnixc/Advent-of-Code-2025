@@ -5,22 +5,19 @@ let input = String.trim {|
 let solve str =
   let pad_line l = "#" ^ l ^ "#" in
   let lines = String.split_on_char '\n' str |> List.map pad_line in
-  let w = String.length (List.hd lines) in
-  let border = String.make w '#' in
+  let border = String.make (String.length (List.hd lines)) '#' in
   let grid_init =
     (border :: lines) @ [ border ]
     |> List.map (fun s -> Array.init (String.length s) (fun i -> s.[i]))
     |> Array.of_list
   in
+
   let p1 = ref 0 in
+
   let count_neighbors grid y x =
-    let neighbors =
-      [ (-1, -1); (0, -1); (1, -1); (-1, 0); (1, 0); (-1, 1); (0, 1); (1, 1) ]
-    in
-    List.filter
-      (fun (dx, dy) ->
-        grid.(y + dy).(x + dx) = '@' || grid.(y + dy).(x + dx) = 'X')
-      neighbors
+    [ (-1, -1); (0, -1); (1, -1); (-1, 0); (1, 0); (-1, 1); (0, 1); (1, 1) ]
+    |> List.filter (fun (dx, dy) ->
+        Array.mem grid.(y + dy).(x + dx) [| '@'; 'X' |])
     |> List.length
   in
 
