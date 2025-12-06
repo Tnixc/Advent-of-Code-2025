@@ -2,6 +2,8 @@ let input = String.trim {|
 #include "inputs/6"
 |} in
 
+(* NOTE I modified the input to replace the columns of only spaces to be | *)
+
 let t =
   {|123 |328| 51|64 
  45 |64 |387|23 
