@@ -3,7 +3,6 @@ let input = String.trim {|
 |} in
 
 (* NOTE I modified the input to replace the columns of only spaces to be | *)
-
 let t =
   {|123 |328| 51|64 
  45 |64 |387|23 
@@ -48,11 +47,10 @@ let p2 =
   Array.map
     (fun op ->
       let operands_h =
-        List.map
-          (fun l ->
-            l.(!i) |> String.to_seq |> List.of_seq |> List.rev
+        nums
+        |> List.map (fun l ->
+            l.(!i) |> String.to_seq |> List.of_seq
             |> List.map (fun c -> String.make 1 c))
-          nums
       in
       incr i;
 
@@ -68,7 +66,7 @@ let p2 =
                 acc ^ (List.nth_opt digits idx |> Option.value ~default:""))
               "" operands_h)
           (List.init highest_len (fun i -> i))
-        |> List.map (fun l -> String.trim l)
+        |> List.map String.trim
         |> List.filter (fun s -> s <> "")
         |> List.map int_of_string
       in
